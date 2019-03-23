@@ -33,12 +33,12 @@ public class EsController {
     /**
      * 测试索引
      */
-    private String indexName = "test_index";
+    private String indexName = "ott-cms-dev";
 
     /**
      * 类型
      */
-    private String esType = "external";
+    private String esType = "figure";
 
     /**
      * http://127.0.0.1:8080/es/createIndex
@@ -231,8 +231,7 @@ public class EsController {
     public String queryPage(String startPage, String pageSize) {
         if (StringUtils.isNotBlank(startPage) && StringUtils.isNotBlank(pageSize)) {
             BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-            boolQuery.must(QueryBuilders.rangeQuery("date").from("2018-04-25T08:33:44.840Z")
-                    .to("2019-04-25T10:03:08.081Z"));
+            boolQuery.must(QueryBuilders.rangeQuery("height").from("0").to("0"));
             EsPage list = ElasticsearchUtil.searchDataPage(indexName, esType, Integer.parseInt(startPage), Integer.parseInt(pageSize), boolQuery, null, null, null);
             return JSONObject.toJSONString(list);
         } else {

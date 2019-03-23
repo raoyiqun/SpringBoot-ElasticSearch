@@ -35,7 +35,7 @@ public class ElasticsearchConfig {
     /**
      * 集群名称
      */
-    @Value("${elasticsearch.cluster.name}")
+    @Value("my-elasticsearch")
     private String clusterName;
 
     /**
