@@ -2,8 +2,7 @@ package cn.thislx.springbootes.config;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,19 +22,13 @@ public class ElasticsearchConfig {
     /**
      * elk集群地址
      */
-    @Value("${elasticsearch.ip}")
-    private String hostName;
-
-    /**
-     * 端口
-     */
-    @Value("${elasticsearch.port}")
-    private String port;
+    @Value("${es.hosts}")
+    private String hosts;
 
     /**
      * 集群名称
      */
-    @Value("my-elasticsearch")
+    @Value("${elasticsearch.cluster.name}")
     private String clusterName;
 
     /**
@@ -55,15 +48,20 @@ public class ElasticsearchConfig {
         TransportClient transportClient = null;
         try {
             // 配置信息
-            Settings esSetting = Settings.builder()
+            Settings esSetting = Settings.settingsBuilder()
                     .put("cluster.name", clusterName) //集群名字
                     .put("client.transport.sniff", true)//增加嗅探机制，找到ES集群
                     .put("thread_pool.search.size", Integer.parseInt(poolSize))//增加线程池个数，暂时设为5
                     .build();
             //配置信息Settings自定义
-            transportClient = new PreBuiltTransportClient(esSetting);
-            TransportAddress transportAddress = new TransportAddress(InetAddress.getByName(hostName), Integer.valueOf(port));
-            transportClient.addTransportAddresses(transportAddress);
+            transportClient = TransportClient.builder().settings(esSetting).build();
+            //transportClient = new PreBuiltTransportClient(esSetting);
+            String[] nodes = hosts.split(",");
+            for (String node : nodes ){
+                String[] host = node.split(":");
+                InetSocketTransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName(host[0]), Integer.valueOf(host[1]));
+                transportClient.addTransportAddresses(transportAddress);
+            }
         } catch (Exception e) {
             LOGGER.error("elasticsearch TransportClient create error!!", e);
         }
